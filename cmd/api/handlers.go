@@ -4,24 +4,40 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 )
 
-func (app *application) quoteHandler(w http.ResponseWriter, r *http.Request) {
-	quotesData, err := os.ReadFile("internal/quotes.json")
+// give data, handler function to automate converting to json
+
+func (app *application) v2healthCheckHandler(w http.ResponseWriter, r *http.Request) {
+
+	// create map to hold the json
+	data := map[string]string{
+		"status":      "available",
+		"environment": app.config.env,
+		"version":     app.config.version,
+	}
+
+	// using json.Marshal, encode the data to json
+	jsResponse, err := json.Marshal(data)
 	if err != nil {
 		app.logger.Error(err.Error())
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		http.Error(w, "The server encountered a problem and could not process your request.", http.StatusInternalServerError)
+
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(quotesData)
-}
+	jsResponse = append(jsResponse, '\n')
 
-// give data, handler function to automate converting to json
+	// set header
+	w.Header().Set("Content-Type", "application/json")
+
+	// write the json to the body
+	w.Write(jsResponse)
+
+}
 
 func (app *application) healthcheckHandler(w http.ResponseWriter, r *http.Request) {
 

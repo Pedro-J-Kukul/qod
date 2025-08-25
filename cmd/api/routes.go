@@ -15,11 +15,14 @@ func (app *application) routes() http.Handler {
 	// create a new router instance
 	router := httprouter.New()
 
-	// handler for the healthcheck api
-	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler)
+	// // handler for the healthcheck api
+	// router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler)
+
+	// version 2
+	router.HandlerFunc(http.MethodGet, "/v2/healthcheck", app.v2healthCheckHandler)
 
 	// handler for a qoutes api
-	router.HandlerFunc(http.MethodGet, "/v1/quotes", app.quoteHandler)
+	// router.HandlerFunc(http.MethodGet, "/v1/quotes", app)
 
 	// return router to call appropriate handlers
 	return router
