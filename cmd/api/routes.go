@@ -21,6 +21,6 @@ func (app *application) routes() http.Handler {
 	// handler for a qoutes api
 	router.HandlerFunc(http.MethodGet, "/v1/quotes", app.quoteHandler)
 
-	// return routes instance with handlers
+	// return router to call appropriate handlers
 	return router
 }

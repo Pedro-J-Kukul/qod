@@ -21,15 +21,19 @@ func (app *application) quoteHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(quotesData)
 }
 
+// give data, handler function to automate converting to json
+
 func (app *application) healthcheckHandler(w http.ResponseWriter, r *http.Request) {
 
 	js := `{"status": "available", 
 	"environment": %q, 
-	"version": %q}`
+	"version": %q
+	}`
 	js = fmt.Sprintf(js, app.config.env, app.config.version)
 
 	// Content-Type is text/plain by default
 
+	// Always set the content type as a json so that the handler sends back json
 	w.Header().Set("Content-Type", "application/json")
 	// Write the JSON as the HTTP response body.
 	w.Write([]byte(js))
