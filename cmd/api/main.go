@@ -28,11 +28,13 @@ func main() {
 	// Setup application logger
 	logger := setupLogger(cfg.env)
 
+	// applying dependency injection
 	app := application{
 		config: cfg,
 		logger: logger,
 	}
 
+	// start the server
 	err := app.serve()
 	if err != nil {
 		logger.Error(err.Error())
@@ -40,6 +42,7 @@ func main() {
 	}
 }
 
+// function to load application configuration
 func loadConfig() configuration {
 	var cfg configuration
 
@@ -51,11 +54,13 @@ func loadConfig() configuration {
 	return cfg
 }
 
+// sets up a logger, uses an development environment as a parameter
 func setupLogger(env string) *slog.Logger {
 	var logger *slog.Logger
 
 	logger = slog.New(slog.NewTextHandler(os.Stdout, nil))
 
+	// to indicate which environment is being used when starting the server
 	logger = logger.With("environment", env)
 
 	return logger
