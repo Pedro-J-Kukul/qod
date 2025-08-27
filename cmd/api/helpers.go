@@ -5,10 +5,13 @@ import (
 	"net/http"
 )
 
+// creating an envelope type
+type envelope map[string]any
+
 // Helper function to write json, has the following parameters:
-// response writer, status code for the server, data of type any to encode, and the headers to specify.
+// response writer, status code for the server, data of custom type envelope which is a map to encode, and the headers to specify.
 // returns an error
-func (a *application) writeJSON(w http.ResponseWriter, status int, data any, headers http.Header) error {
+func (a *application) writeJSON(w http.ResponseWriter, status int, data envelope, headers http.Header) error {
 
 	// encodes data to json
 	// use marshall indent to add an indent on each line of json
@@ -23,8 +26,6 @@ func (a *application) writeJSON(w http.ResponseWriter, status int, data any, hea
 	// setting addtiional headers
 	for key, value := range headers {
 		w.Header()[key] = value
-
-		// w.Header().Set*key, value[0]
 	}
 
 	// set content type to header

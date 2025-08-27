@@ -4,11 +4,16 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	// Importing Route Package
 	"github.com/julienschmidt/httprouter"
 )
+
+func (app *application) healthCheckName() string {
+	return fmt.Sprintf(`/%v/healthcheck`, app.config.version)
+}
 
 func (app *application) routes() http.Handler {
 
@@ -19,7 +24,7 @@ func (app *application) routes() http.Handler {
 	// router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler)
 
 	// version 2
-	router.HandlerFunc(http.MethodGet, "/v4/healthcheck", app.healthcheckHandlerV4)
+	router.HandlerFunc(http.MethodGet, app.healthCheckName(), app.healthcheckHandler)
 
 	// handler for a qoutes api
 	// router.HandlerFunc(http.MethodGet, "/v1/quotes", app)

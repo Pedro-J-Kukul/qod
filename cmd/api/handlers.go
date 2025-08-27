@@ -9,13 +9,15 @@ import (
 
 // give data, handler function to automate converting to json
 
-func (app *application) healthcheckHandlerV4(w http.ResponseWriter, r *http.Request) {
+func (app *application) healthcheckHandler(w http.ResponseWriter, r *http.Request) {
 
 	// create map to hold the json
-	data := map[string]string{
-		"status":      "available",
-		"environment": app.config.env,
-		"version":     app.config.version,
+	data := envelope{
+		"status": "available",
+		"system_info": map[string]string{
+			"environment": app.config.env,
+			"version":     app.config.version,
+		},
 	}
 
 	// call helper function to write to json
