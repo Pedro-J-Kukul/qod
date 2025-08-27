@@ -19,7 +19,7 @@ func (app *application) routes() http.Handler {
 	// router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler)
 
 	// version 2
-	router.HandlerFunc(http.MethodGet, "/v3/healthcheck", app.healthcheckHandlerV3)
+	router.HandlerFunc(http.MethodGet, "/v4/healthcheck", app.healthcheckHandlerV4)
 
 	// handler for a qoutes api
 	// router.HandlerFunc(http.MethodGet, "/v1/quotes", app)

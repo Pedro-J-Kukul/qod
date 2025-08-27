@@ -10,3 +10,8 @@ run/api:
 .PHONY: run/tests
 run/tests:
 	go test ./...
+
+## run/curl: run a curl command to test the healthcheck endpoint
+.PHONY: run/curl
+run/curl:
+	curl -i localhost:$(PORT)/v4/healthcheck

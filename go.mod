@@ -1,5 +1,5 @@
 module github.com/Pedro-J-Kukul/qod
 
-go 1.24.6
+go 1.25.0
 
 require github.com/julienschmidt/httprouter v1.3.0

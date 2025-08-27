@@ -9,7 +9,7 @@ import (
 
 // give data, handler function to automate converting to json
 
-func (app *application) healthcheckHandlerV3(w http.ResponseWriter, r *http.Request) {
+func (app *application) healthcheckHandlerV4(w http.ResponseWriter, r *http.Request) {
 
 	// create map to hold the json
 	data := map[string]string{

@@ -11,7 +11,8 @@ import (
 func (a *application) writeJSON(w http.ResponseWriter, status int, data any, headers http.Header) error {
 
 	// encodes data to json
-	jsResponse, err := json.Marshal(data)
+	// use marshall indent to add an indent on each line of json
+	jsResponse, err := json.MarshalIndent(data, "", "\t")
 	if err != nil {
 		return err
 	}
@@ -19,7 +20,7 @@ func (a *application) writeJSON(w http.ResponseWriter, status int, data any, hea
 	// append json and add a new line after each appendage
 	jsResponse = append(jsResponse, '\n')
 
-	// set key value pairs
+	// setting addtiional headers
 	for key, value := range headers {
 		w.Header()[key] = value
 
@@ -27,14 +28,16 @@ func (a *application) writeJSON(w http.ResponseWriter, status int, data any, hea
 	}
 
 	// set content type to header
-
 	w.Header().Set("Content-Type", "application/json")
 
-	// write to header
+	// Explicitly setting the response status code
 	w.WriteHeader(status)
 
-	// write the json to the body
-	w.Write(jsResponse)
+	// writing the json to the body, but also checking for errors
+	_, err = w.Write(jsResponse)
+	if err != nil {
+		return err
+	}
 
 	// returns no error/empty
 	return nil
