@@ -3,7 +3,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	// internal data
@@ -12,17 +11,17 @@ import (
 func (a *application) createCommentHandler(w http.ResponseWriter, r *http.Request) {
 	// create a struct to thold a comment
 	// we use a struct tag [``] to maek the names display in lowercase
-	var incomindData struct {
+	var incomingData struct {
 		Content string `json:"content"`
 		Author  string `json:"author"`
 	}
 
 	// Perform the decoding
-	err := json.NewDecoder(r.Body).Decode(&incomindData)
+	err := a.readJson(w, r, &incomingData)
 	if err != nil {
-		a.errorResponseJSON(w, r, http.StatusBadRequest, err.Error())
+		a.badRequestResponse(w, r, err)
 		return
 	}
 
-	fmt.Fprintf(w, "%+v\n", incomindData)
+	fmt.Fprintf(w, "%+v\n", incomingData)
 }
