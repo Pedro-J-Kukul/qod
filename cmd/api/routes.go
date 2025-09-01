@@ -25,5 +25,6 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, app.healthCheckName(), app.healthcheckHandler)
 
 	// return router to call appropriate handlers
-	return router
+	// include panic middleware
+	return app.recoverPanic(router)
 }
