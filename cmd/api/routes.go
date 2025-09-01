@@ -4,16 +4,11 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 
 	// Importing Route Package
 	"github.com/julienschmidt/httprouter"
 )
-
-func (app *application) healthCheckName() string {
-	return fmt.Sprintf(`/%v/healthcheck`, app.config.version)
-}
 
 func (app *application) routes() http.Handler {
 

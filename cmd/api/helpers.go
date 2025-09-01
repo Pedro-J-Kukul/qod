@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -42,4 +43,8 @@ func (a *application) writeJSON(w http.ResponseWriter, status int, data envelope
 
 	// returns no error/empty
 	return nil
+}
+
+func (app *application) healthCheckName() string {
+	return fmt.Sprintf(`/v%v/healthcheck`, app.config.version)
 }
