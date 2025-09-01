@@ -45,6 +45,6 @@ func (a *application) writeJSON(w http.ResponseWriter, status int, data envelope
 	return nil
 }
 
-func (app *application) healthCheckName() string {
-	return fmt.Sprintf(`/v%v/healthcheck`, app.config.version)
+func (app *application) versioncontrolURI(pattern string) string {
+	return fmt.Sprintf(`/v%v/%v`, app.config.version, pattern)
 }

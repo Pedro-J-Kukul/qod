@@ -22,7 +22,10 @@ func (app *application) routes() http.Handler {
 	router.MethodNotAllowed = http.HandlerFunc(app.methodNotAllowedResponse)
 
 	// handler for the healthcheck api
-	router.HandlerFunc(http.MethodGet, app.healthCheckName(), app.healthcheckHandler)
+	router.HandlerFunc(http.MethodGet, app.versioncontrolURI("healthcheck"), app.healthcheckHandler)
+
+	// handler for creating comments api
+	router.HandlerFunc(http.MethodPost, app.versioncontrolURI("comments"), app.createCommentHandler)
 
 	// return router to call appropriate handlers
 	// include panic middleware
