@@ -86,13 +86,12 @@ func (a *application) readJson(w http.ResponseWriter, r *http.Request, dest any)
 			fieldName := strings.TrimPrefix(err.Error(),
 				"json: unknown field ")
 			return fmt.Errorf("body contains unknown key %s", fieldName)
-		// does the body exceed our limit of 250KB?
+			//Size
 		case errors.As(err, &maxBytesError):
 			return fmt.Errorf("the body must not be larger than %d bytes", maxBytesError.Limit)
-		// the programmer messed up
+			// some error the programmer made
 		case errors.As(err, &invalidUnmarshalError):
 			panic(err)
-			// some other type of errors
 		default:
 			return err
 		}
@@ -104,7 +103,8 @@ func (a *application) readJson(w http.ResponseWriter, r *http.Request, dest any)
 	// we use a throw away struct 'struct{}{}' to hold the result
 	err = dec.Decode(&struct{}{})
 
-	if !errors.Is(err, io.EOF) { // there is more data present
+	if !errors.Is(err, io.EOF) {
+		// there is more data present
 		return errors.New("the body must only contain a single JSON value")
 	}
 

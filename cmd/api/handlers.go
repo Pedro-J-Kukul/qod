@@ -7,8 +7,9 @@ import (
 	"net/http"
 )
 
-// give data, handler function to automate converting to json
+// Wehen sending a rsponse, we send the header first and then the body
 
+// give data, handler function to automate converting to json
 func (app *application) healthcheckHandler(w http.ResponseWriter, r *http.Request) {
 
 	// create map to hold the json

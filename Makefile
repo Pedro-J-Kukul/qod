@@ -25,3 +25,9 @@ bump/version:
 	new_version=$$((current_version + 1)); \
 	sed -i.bak "s/VERSION=[0-9]*/VERSION=$$new_version/" .envrc; \
 	echo "Version bumped: v$$current_version → v$$new_version"
+
+# make command to post a comment
+.PHONY: run/quote
+run/quote:
+	BODY='{"type":"Inspirational", "quote":"I am fond of pigs. Dogs look up to us. Cats look down on us. Pigs treat us as equals.", "author":"Winston S. Churchill"}'
+	curl -i -d "$BODY" localhost:4000/v13/quote

@@ -27,6 +27,8 @@ func (app *application) routes() http.Handler {
 	// handler for creating comments api
 	router.HandlerFunc(http.MethodPost, app.versioncontrolURI("comments"), app.createCommentHandler)
 
+	// hadnler for creating qoutes api
+	router.HandlerFunc(http.MethodPost, app.versioncontrolURI("quote"), app.createQouteHandler)
 	// return router to call appropriate handlers
 	// include panic middleware
 	return app.recoverPanic(router)
