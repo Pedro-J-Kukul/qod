@@ -29,5 +29,12 @@ bump/version:
 # make command to post a comment
 .PHONY: run/quote
 run/quote:
+	@echo "Posting a quote..."
 	BODY='{"type":"Inspirational", "quote":"I am fond of pigs. Dogs look up to us. Cats look down on us. Pigs treat us as equals.", "author":"Winston S. Churchill"}'; \
 	curl -i -H "Content-Type: application/json" -d "$$BODY" localhost:$(PORT)/v$(VERSION)/quote
+
+# make command to login as the qoute useer for the qoute database
+.PHONY: psql/login
+psql/login:
+	@echo "Logging into PostgreSQL..."
+	psql --host=localhost --dbname=quotes --username=quotes
