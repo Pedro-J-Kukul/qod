@@ -22,5 +22,5 @@ func (a *application) createQouteHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	// Print on a new line the qoute insertedpsql --vers
-	fmt.Fprintf(w, "%+v\n", incomingData)
+	fmt.Fprintf(w, "\n%+v\t\n", incomingData)
 }
