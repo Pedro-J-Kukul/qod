@@ -61,3 +61,8 @@ func (a *appDependencies) badRequestResponse(w http.ResponseWriter, r *http.Requ
 
 	a.errorResponseJSON(w, r, http.StatusBadRequest, err.Error())
 }
+
+// error response for failed validation checks with a 422 status code
+func (a *appDependencies) failedValidationResponse(w http.ResponseWriter, r *http.Request, errors map[string]string) {
+	a.errorResponseJSON(w, r, http.StatusUnprocessableEntity, errors)
+}

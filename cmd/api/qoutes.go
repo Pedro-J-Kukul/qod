@@ -6,6 +6,9 @@ package main
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/Pedro-J-Kukul/qod/internal/data"
+	"github.com/Pedro-J-Kukul/qod/internal/validator"
 )
 
 // Handler for creating qoutes
@@ -22,6 +25,22 @@ func (a *appDependencies) createQouteHandler(w http.ResponseWriter, r *http.Requ
 	if err != nil {
 		a.badRequestResponse(w, r, err)
 		// return to prevent further processing
+		return
+	}
+	// create a qoute struct to hold the data for insertion
+	quote := &data.Qoute{
+		Type:   incomingData.Type,
+		Qoute:  incomingData.Quote,
+		Author: incomingData.Author,
+	}
+
+	// validator instance
+	v := validator.NewValidator()
+
+	// validate the incoming data
+	data.ValidateQoute(v, quote)
+	if !v.IsEmpty() {
+		a.failedValidationResponse(w, r, v.Errors)
 		return
 	}
 
