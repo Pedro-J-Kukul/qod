@@ -30,7 +30,7 @@ bump/version:
 .PHONY: run/quote
 run/quote:
 	@echo "Posting a quote..."
-	BODY='{"type":"Inspirational", "quote":"I am fond of pigs. Dogs look up to us. Cats look down on us. Pigs treat us as equals.", "author":"Winston S. Churchill"}'; \
+	BODY='{"type":"funny", "quote":"I am fond of pigs. Dogs look up to us. Cats look down on us. Pigs treat us as equals.", "author":"Winston S. Churchill"}'; \
 	curl -i -H "Content-Type: application/json" -d "$$BODY" localhost:$(PORT)/v6/quotes
 
 # Create a new migration file
@@ -46,12 +46,32 @@ migration/create:
 # Apply all up migrations
 .PHONY: migration/up
 migration/up:
-	migrate -path ./migrations -database "$(DB_DSN)" up
+	migrate -path ./migrations -database "$(DB_DSN)" up 1
 
-# Apply all down migrations
+# Apply all down 1 migrations
 .PHONY: migration/down
 migration/down:
-	migrate -path ./migrations -database "$(DB_DSN)" down
+	migrate -path ./migrations -database "$(DB_DSN)" down 1
+
+# fix and reapply the last migration and fix dirty state
+.PHONY: migration/fix
+migration/fix:
+	@echo 'Checking migration status...'
+	@migrate -path ./migrations -database "${DB_DSN}" version > /tmp/migrate_version 2>&1
+	@cat /tmp/migrate_version
+	@if grep -q "dirty" /tmp/migrate_version; then \
+		version=$$(grep -o '[0-9]\+' /tmp/migrate_version | head -1); \
+		echo "Found dirty migration at version $$version"; \
+		echo "Forcing version $$version..."; \
+		migrate -path ./migrations -database "${DB_DSN}" force $$version; \
+		echo "Running down migration..."; \
+		migrate -path ./migrations -database "${DB_DSN}" down 1; \
+		echo "Running up migration..."; \
+		migrate -path ./migrations -database "${DB_DSN}" up; \
+	else \
+		echo "No dirty migration found"; \
+	fi
+	@rm -f /tmp/migrate_version
 
 # Login to psql
 .PHONY: psql/login
