@@ -1,6 +1,10 @@
 package data
 
 import (
+	"context"
+	"database/sql"
+	"time"
+
 	"github.com/Pedro-J-Kukul/qod/internal/validator"
 )
 
@@ -28,4 +32,23 @@ func ValidateQoute(v *validator.Validator, q *Qoute) {
 	v.Check(q.Author != "", "author", "must be provided")
 	// Check that the author is not too long (e.g., max 255 characters)
 	v.Check(len(q.Author) <= 255, "author", "must not be more than 255 characters long")
+}
+
+type QuoteModel struct {
+	DB *sql.DB
+}
+
+func (q QuoteModel) Insert(quote *Qoute) error {
+	query := `
+		INSERT INTO quotes (type, quote, author)
+		VALUES ($1, $2, $3)
+		RETURNING id, created_at, version
+	`
+
+	args := []any{quote.Type, quote.Qoute, quote.Author}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	return q.DB.QueryRowContext(ctx, query, args...).Scan(&quote.ID, &quote.CreatedAt, &quote.Version)
 }
