@@ -31,3 +31,33 @@ bump/version:
 run/quote:
 	BODY='{"type":"Inspirational", "quote":"I am fond of pigs. Dogs look up to us. Cats look down on us. Pigs treat us as equals.", "author":"Winston S. Churchill"}'; \
 	curl -i -H "Content-Type: application/json" -d "$$BODY" localhost:$(PORT)/v$(VERSION)/quote
+
+# Create a new migration file
+.PHONY: migration/create
+migration/create:
+	@if [ -z "$(name)" ]; then \
+		echo "Error: Please provide a name for the migration using 'make migration/create name=your_migration_name'"; \
+		exit 1; \
+	fi
+	@if [ ! -d "./migrations" ]; then mkdir ./migrations; fi
+	migrate create -seq -ext=.sql -dir=./migrations $(name)
+
+# Apply all up migrations
+.PHONY: migration/up
+migration/up:
+	migrate -path ./migrations -database "$(DB_DSN)" up
+
+# Apply all down migrations
+.PHONY: migration/down
+migration/down:
+	migrate -path ./migrations -database "$(DB_DSN)" down
+
+# Login to psql
+.PHONY: psql/login
+psql/login:
+	psql "$(DB_DSN)"
+
+# login to postgresql as sudo
+.PHONY: psql/sudo
+psql/sudo:
+	sudo -u postgres psql
