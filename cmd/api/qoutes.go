@@ -44,6 +44,20 @@ func (a *appDependencies) createQouteHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	// for now just print the incoming data to the console
-	fmt.Fprintf(w, "\n%+v\t\n", incomingData)
+	err = a.model.Insert(quote)
+	if err != nil {
+		a.serverErrorResponse(w, r, err)
+		return
+	}
+
+	headers := make(http.Header)
+	headers.Set("Location", fmt.Sprintf("/v1/qoutes/%d", quote.ID))
+
+	// send a JSON response with 201 status code
+	data := envelope{"qoute": quote}
+	err = a.writeJSON(w, http.StatusCreated, data, headers)
+	if err != nil {
+		a.serverErrorResponse(w, r, err)
+		return
+	}
 }
