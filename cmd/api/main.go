@@ -10,6 +10,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/Pedro-J-Kukul/qod/internal/data"
+
 	_ "github.com/lib/pq"
 )
 
@@ -29,6 +31,7 @@ type serverConfig struct {
 type appDependencies struct {
 	config serverConfig
 	logger *slog.Logger
+	model  data.QuoteModel
 }
 
 // Function: main
@@ -48,6 +51,7 @@ func main() {
 	app := appDependencies{
 		config: cfg,
 		logger: logger,
+		model:  data.QuoteModel{DB: db},
 	}
 
 	err = app.serve()
