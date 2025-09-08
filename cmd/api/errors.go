@@ -9,14 +9,14 @@ import (
 )
 
 // error helper function to correctly log an error
-func (app *application) logError(r *http.Request, err error) {
+func (app *appDependencies) logError(r *http.Request, err error) {
 	method := r.Method
 	uri := r.URL.RequestURI()
 	app.logger.Error(err.Error(), "method", method, "uri", uri)
 }
 
 // Sends an error response in JSON format
-func (app *application) errorResponseJSON(w http.ResponseWriter, r *http.Request, status int, message any) {
+func (app *appDependencies) errorResponseJSON(w http.ResponseWriter, r *http.Request, status int, message any) {
 	// create an envelope of error data
 	errorData := envelope{"error": message}
 	err := app.writeJSON(w, status, errorData, nil)
@@ -28,7 +28,7 @@ func (app *application) errorResponseJSON(w http.ResponseWriter, r *http.Request
 }
 
 // sends an error in case our server is kabloey
-func (app *application) serverErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
+func (app *appDependencies) serverErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
 	// log the error
 	app.logError(r, err)
 	// prepare a message to send to the clietn
@@ -37,7 +37,7 @@ func (app *application) serverErrorResponse(w http.ResponseWriter, r *http.Reque
 }
 
 // send an error response if our client messes up with a 404
-func (app *application) notFoundResponse(w http.ResponseWriter,
+func (app *appDependencies) notFoundResponse(w http.ResponseWriter,
 	r *http.Request) {
 
 	// we only log server errors, not client errors
@@ -47,7 +47,7 @@ func (app *application) notFoundResponse(w http.ResponseWriter,
 }
 
 // send an error response if our client messes up with a 405
-func (app *application) methodNotAllowedResponse(w http.ResponseWriter, r *http.Request) {
+func (app *appDependencies) methodNotAllowedResponse(w http.ResponseWriter, r *http.Request) {
 
 	// we only log server errors, not client errors
 	// prepare a formatted response to send to the client
@@ -57,7 +57,7 @@ func (app *application) methodNotAllowedResponse(w http.ResponseWriter, r *http.
 }
 
 // send an error response if our client messes up with a 400 (bad request)
-func (a *application) badRequestResponse(w http.ResponseWriter, r *http.Request, err error) {
+func (a *appDependencies) badRequestResponse(w http.ResponseWriter, r *http.Request, err error) {
 
 	a.errorResponseJSON(w, r, http.StatusBadRequest, err.Error())
 }

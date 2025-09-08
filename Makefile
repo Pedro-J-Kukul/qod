@@ -4,7 +4,7 @@ include .envrc
 ## run/api: run the cmd/api application
 .PHONY: run/api
 run/api:
-	go run ./cmd/api --port=$(PORT) --env=$(ENV) --version=$(VERSION)
+	go run ./cmd/api --port=$(PORT) --env=$(ENV) --db-dsn=$(DB_DSN)
 
 ## run/tests: run the tests
 .PHONY: run/tests
@@ -33,8 +33,32 @@ run/quote:
 	BODY='{"type":"Inspirational", "quote":"I am fond of pigs. Dogs look up to us. Cats look down on us. Pigs treat us as equals.", "author":"Winston S. Churchill"}'; \
 	curl -i -H "Content-Type: application/json" -d "$$BODY" localhost:$(PORT)/v$(VERSION)/quote
 
-# make command to login as the qoute useer for the qoute database
+# Create a new migration file
+.PHONY: migration/create
+migration/create:
+	@if [ -z "$(name)" ]; then \
+		echo "Error: Please provide a name for the migration using 'make migration/create name=your_migration_name'"; \
+		exit 1; \
+	fi
+	@if [ ! -d "./migrations" ]; then mkdir ./migrations; fi
+	migrate create -seq -ext=.sql -dir=./migrations $(name)
+
+# Apply all up migrations
+.PHONY: migration/up
+migration/up:
+	migrate -path ./migrations -database "$(DB_DSN)" up
+
+# Apply all down migrations
+.PHONY: migration/down
+migration/down:
+	migrate -path ./migrations -database "$(DB_DSN)" down
+
+# Login to psql
 .PHONY: psql/login
 psql/login:
-	@echo "Logging into PostgreSQL..."
-	psql --host=localhost --dbname=quotes --username=quotes
+	psql "$(DB_DSN)"
+
+# login to postgresql as sudo
+.PHONY: psql/sudo
+psql/sudo:
+	sudo -u postgres psql

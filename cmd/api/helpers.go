@@ -1,3 +1,6 @@
+// file: cmd/api/helpers.go
+// Description: Helper functions for JSON encoding/decoding and error handling
+
 package main
 
 import (
@@ -15,10 +18,9 @@ type envelope map[string]any
 // Helper function to write json, has the following parameters:
 // response writer, status code for the server, data of custom type envelope which is a map to encode, and the headers to specify.
 // returns an error
-func (a *application) writeJSON(w http.ResponseWriter, status int, data envelope, headers http.Header) error {
+func (a *appDependencies) writeJSON(w http.ResponseWriter, status int, data envelope, headers http.Header) error {
 
-	// encodes data to json
-	// use marshall indent to add an indent on each line of json
+	// encodes data into json format by using indenting for better readability
 	jsResponse, err := json.MarshalIndent(data, "", "\t")
 	if err != nil {
 		return err
@@ -27,7 +29,7 @@ func (a *application) writeJSON(w http.ResponseWriter, status int, data envelope
 	// append json and add a new line after each appendage
 	jsResponse = append(jsResponse, '\n')
 
-	// setting addtiional headers
+	// add any headers that we want to the response
 	for key, value := range headers {
 		w.Header()[key] = value
 	}
@@ -48,37 +50,49 @@ func (a *application) writeJSON(w http.ResponseWriter, status int, data envelope
 	return nil
 }
 
-func (app *application) versioncontrolURI(pattern string) string {
-	return fmt.Sprintf(`/v%v/%v`, app.config.version, pattern)
-}
+// Helper function to read json from request body also performs error handling
+// takes in response writer, request and a destination of any type
+// returns an error
+func (a *appDependencies) readJson(w http.ResponseWriter, r *http.Request, dest any) error {
 
-func (a *application) readJson(w http.ResponseWriter, r *http.Request, dest any) error {
-
-	// what is the max size of the request body (250KB seems reasonable)
+	// limit the size of the request body to 256000 bytes
 	maxBytes := 256_000
 	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
+
 	// our decoder will check for unknown fields
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
+
 	// let start the decoding
 	err := dec.Decode(dest)
+
+	// Check for different errors
 	if err != nil {
-		// Check for different errors
+		// syntax error
 		var syntaxError *json.SyntaxError
+		// incorrect type error
 		var unmarshalTypeError *json.UnmarshalTypeError
+		// empty body error
 		var invalidUnmarshalError *json.InvalidUnmarshalError
+		// max size error
 		var maxBytesError *http.MaxBytesError
 
+		// using a switch to handle different errors
 		switch {
+		// check for syntax error
 		case errors.As(err, &syntaxError):
 			return fmt.Errorf("the body contains badly-formed JSON (at character %d)", syntaxError.Offset)
+			// check for unexpected EOF error
 		case errors.Is(err, io.ErrUnexpectedEOF):
 			return errors.New("the body contains badly-formed JSON")
+			// check for incorrect type error
 		case errors.As(err, &unmarshalTypeError):
+			// if the field is not empty, it means we have a specific field that is incorrect
 			if unmarshalTypeError.Field != "" {
 				return fmt.Errorf("the body contains the incorrect JSON type for field %q", unmarshalTypeError.Field)
 			}
 			return fmt.Errorf("the body contains the incorrect  JSON type (at character %d)", unmarshalTypeError.Offset)
+			// check for empty body error
 		case errors.Is(err, io.EOF):
 			return errors.New("the body must not be empty")
 			// check for unknown field error
@@ -96,15 +110,12 @@ func (a *application) readJson(w http.ResponseWriter, r *http.Request, dest any)
 			return err
 		}
 	}
-	// almost done. Let's lastly check if there is any data after
-	// the valid JSON data. Maybe the person is trying to send
-	// multiple request bodies during one request
-	// We call decode once more to see if it gives us back anything
-	// we use a throw away struct 'struct{}{}' to hold the result
+
+	// call decode again to check if there is only a single json value in the body
 	err = dec.Decode(&struct{}{})
 
+	// if the error is not EOF, then there is more than one value in the body
 	if !errors.Is(err, io.EOF) {
-		// there is more data present
 		return errors.New("the body must only contain a single JSON value")
 	}
 
