@@ -4,7 +4,7 @@ include .envrc
 ## run/api: run the cmd/api application
 .PHONY: run/api
 run/api:
-	go run ./cmd/api --port=$(PORT) --env=$(ENV) --version=$(VERSION)
+	go run ./cmd/api --port=$(PORT) --env=$(ENV) --db-dsn=$(DB_DSN)
 
 ## run/tests: run the tests
 .PHONY: run/tests
