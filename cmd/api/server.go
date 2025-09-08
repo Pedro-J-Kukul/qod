@@ -7,8 +7,11 @@ import (
 	"time"
 )
 
-// function that holds the server configuration
-func (app *application) serve() error {
+// Function: serve
+// Description: Starts the HTTP server
+func (app *appDependencies) serve() error {
+
+	// create a new http server with some sensible timeout settings
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", app.config.port),
 		Handler:      app.routes(),
@@ -18,7 +21,9 @@ func (app *application) serve() error {
 		ErrorLog:     slog.NewLogLogger(app.logger.Handler(), slog.LevelError),
 	}
 
+	// log the server start
 	app.logger.Info("starting server", "addr", srv.Addr, "env", app.config.env)
 
+	// start the server
 	return srv.ListenAndServe()
 }

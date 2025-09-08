@@ -8,7 +8,7 @@ import (
 	// internal data
 )
 
-func (a *application) createCommentHandler(w http.ResponseWriter, r *http.Request) {
+func (a *appDependencies) createCommentHandler(w http.ResponseWriter, r *http.Request) {
 	// create a struct to thold a comment
 	// we use a struct tag [``] to maek the names display in lowercase
 	var incomingData struct {

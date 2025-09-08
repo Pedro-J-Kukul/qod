@@ -10,7 +10,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func (app *application) routes() http.Handler {
+func (app *appDependencies) routes() http.Handler {
 
 	// create a new router instance
 	router := httprouter.New()
@@ -21,15 +21,11 @@ func (app *application) routes() http.Handler {
 	// handling 405 errors
 	router.MethodNotAllowed = http.HandlerFunc(app.methodNotAllowedResponse)
 
-	// handler for the healthcheck api
-	router.HandlerFunc(http.MethodGet, app.versioncontrolURI("healthcheck"), app.healthcheckHandler)
+	// Define the routes
+	router.HandlerFunc(http.MethodGet, "/v5/healthcheck", app.healthcheckHandler)
+	router.HandlerFunc(http.MethodPost, "/v8/comments", app.createCommentHandler)
+	router.HandlerFunc(http.MethodGet, "/v6/quotes", app.createQouteHandler)
 
-	// handler for creating comments api
-	router.HandlerFunc(http.MethodPost, app.versioncontrolURI("comments"), app.createCommentHandler)
-
-	// hadnler for creating qoutes api
-	router.HandlerFunc(http.MethodPost, app.versioncontrolURI("quote"), app.createQouteHandler)
-	// return router to call appropriate handlers
 	// include panic middleware
 	return app.recoverPanic(router)
 }

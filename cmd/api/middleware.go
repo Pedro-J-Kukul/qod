@@ -5,10 +5,12 @@ import (
 	"net/http"
 )
 
-func (a *application) recoverPanic(next http.Handler) http.Handler {
+// Middleware to close connection when an unexpected panic occurs
+func (a *appDependencies) recoverPanic(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// defer will be called when the stack unwinds
 		defer func() {
+			// recover from the panic and log the error
 			err := recover()
 			if err != nil {
 				w.Header().Set("Connection", "close")
