@@ -31,7 +31,7 @@ bump/version:
 run/quote:
 	@echo "Posting a quote..."
 	BODY='{"type":"Inspirational", "quote":"I am fond of pigs. Dogs look up to us. Cats look down on us. Pigs treat us as equals.", "author":"Winston S. Churchill"}'; \
-	curl -i -H "Content-Type: application/json" -d "$$BODY" localhost:$(PORT)/v$(VERSION)/quote
+	curl -i -H "Content-Type: application/json" -d "$$BODY" localhost:$(PORT)/v6/quotes
 
 # Create a new migration file
 .PHONY: migration/create
