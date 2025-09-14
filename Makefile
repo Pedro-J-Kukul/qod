@@ -31,12 +31,28 @@ bump/version:
 api/insert:
 	@echo "Posting a quote..."
 	BODY='{"type":"funny", "quote":"I am fond of pigs. Dogs look up to us. Cats look down on us. Pigs treat us as equals.", "author":"Winston S. Churchill"}'; \
-	curl -i -H "Content-Type: application/json" -d "$$BODY" localhost:$(PORT)/v6/quotes
+	curl -i -H "Content-Type: application/json" -d "$$BODY" localhost:$(PORT)/v1/quotes
 
+# make command to get a comment with id input
 .PHONY: api/get
 api/get:
 	@echo "Getting a quote..."
-	curl -i localhost:$(PORT)/v1/quotes/1
+	curl -i localhost:$(PORT)/v1/quotes/$(id)
+
+# make command to update a comment with id input
+.PHONY: api/update
+api/update:
+	@echo "Updating a quote..."
+	BODY='{"quote": "Dog eat Cat Yes"}'; \
+	curl -i -X PATCH -H "Content-Type: application/json" -d "$$BODY" localhost:$(PORT)/v1/quotes/$(id)
+
+# make command to test update with no fields
+.PHONY: api/update/empty
+api/update/empty:
+	@echo "Updating a quote with no fields..."
+	BODY='{}'; \
+	curl -i -X PATCH -H "Content-Type: application/json" -d "$$BODY" localhost:$(PORT)/v1/quotes/$(id)
+
 
 # Create a new migration file
 .PHONY: migration/create

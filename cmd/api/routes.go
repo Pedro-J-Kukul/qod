@@ -23,9 +23,9 @@ func (app *appDependencies) routes() http.Handler {
 
 	// Define the routes
 	router.HandlerFunc(http.MethodGet, "/v5/healthcheck", app.healthcheckHandler)
-	router.HandlerFunc(http.MethodPost, "/v8/comments", app.createCommentHandler)
-	router.HandlerFunc(http.MethodPost, "/v6/quotes", app.createQouteHandler)
+	router.HandlerFunc(http.MethodPost, "/v2/quotes", app.createQouteHandler)
 	router.HandlerFunc(http.MethodGet, "/v1/quotes/:id", app.displayQouteHandler)
+	router.HandlerFunc(http.MethodPatch, "/v1/quotes/:id", app.updateQouteHandler)
 
 	// include panic middleware
 	return app.recoverPanic(router)

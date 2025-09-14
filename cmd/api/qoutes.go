@@ -91,3 +91,75 @@ func (a *appDependencies) displayQouteHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 }
+
+// Update Qoute Handler
+func (a *appDependencies) updateQouteHandler(w http.ResponseWriter, r *http.Request) {
+	// Get the id from the URL
+	id, err := a.readIDParam(r)
+	if err != nil {
+		a.notFoundResponse(w, r)
+		return
+	}
+
+	// Call the Get method on the model to retrieve the data
+	quote, err := a.model.Get(id)
+	if err != nil {
+		switch {
+		case err == data.ErrRecordNotFound:
+			a.notFoundResponse(w, r)
+		default:
+			a.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	// create a struct to hold the incoming qoute data
+	var incomingData struct {
+		Type   *string `json:"type"`
+		Quote  *string `json:"quote"`
+		Author *string `json:"author"`
+	}
+
+	// Perform the decoding
+	err = a.readJson(w, r, &incomingData)
+	if err != nil {
+		a.badRequestResponse(w, r, err)
+		// return to prevent further processing
+		return
+	}
+
+	// check which fields were provided and update the record accordingly
+	if incomingData.Type != nil {
+		quote.Type = *incomingData.Type
+	}
+	if incomingData.Quote != nil {
+		quote.Qoute = *incomingData.Quote
+	}
+	if incomingData.Author != nil {
+		quote.Author = *incomingData.Author
+	}
+
+	// validator instance
+	v := validator.NewValidator()
+
+	// validate the incoming data
+	data.ValidateQoute(v, quote)
+	if !v.IsEmpty() {
+		a.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	err = a.model.Update(quote)
+	if err != nil {
+		a.serverErrorResponse(w, r, err)
+		return
+	}
+
+	// send a JSON response with 200 status code
+	data := envelope{"qoute": quote}
+	err = a.writeJSON(w, http.StatusOK, data, nil)
+	if err != nil {
+		a.serverErrorResponse(w, r, err)
+		return
+	}
+}

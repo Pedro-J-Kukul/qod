@@ -96,3 +96,26 @@ func (q QuoteModel) Get(id int64) (*Qoute, error) {
 
 	return &quote, nil
 }
+
+// Update Method
+func (q QuoteModel) Update(quote *Qoute) error {
+	// sql query to update a record
+	query := `
+		UPDATE quotes
+		SET type = $1, quote = $2, author = $3, version = version + 1
+		WHERE id = $4
+		RETURNING version
+	`
+	// args slice to hold the values for the placeholders in the query
+	args := []any{
+		quote.Type,
+		quote.Qoute,
+		quote.Author,
+		quote.ID,
+	}
+	// create a context with a 3-second timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	return q.DB.QueryRowContext(ctx, query, args...).Scan(&quote.Version)
+}
