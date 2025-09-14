@@ -3,6 +3,7 @@ package data
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/Pedro-J-Kukul/qod/internal/validator"
@@ -21,7 +22,7 @@ func ValidateQoute(v *validator.Validator, q *Qoute) {
 	// Check that the type is provided
 	v.Check(q.Type != "", "type", "must be provided")
 	// Check that the type is one of the supported types
-	v.Check(q.Type == "inspire" || q.Type == "management" || q.Type == "sports" || q.Type == "life" || q.Type == "funny", "type", "must be one of the supported types")
+	// v.Check(q.Type == "inspire" || q.Type == "management" || q.Type == "sports" || q.Type == "life" || q.Type == "funny", "type", "must be one of the supported types")
 
 	// Check that the quote is provided
 	v.Check(q.Qoute != "", "quote", "must be provided")
@@ -51,4 +52,47 @@ func (q QuoteModel) Insert(quote *Qoute) error {
 	defer cancel()
 
 	return q.DB.QueryRowContext(ctx, query, args...).Scan(&quote.ID, &quote.CreatedAt, &quote.Version)
+}
+
+func (q QuoteModel) Get(id int64) (*Qoute, error) {
+	// Check if the id is valid
+	if id < 1 {
+		return nil, ErrRecordNotFound
+	}
+
+	// the SQL query to be executed
+	query := `
+		SELECT id, type, quote, author, created_at, version
+		FROM quotes
+		WHERE id = $1
+	`
+
+	// Declare a variable to hold the data returned by the query
+	var quote Qoute
+
+	// Create a context with a 3-second timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	// Execute the query using QueryRowContext, passing in the context, query, and id
+	err := q.DB.QueryRowContext(ctx, query, id).Scan(
+		&quote.ID,
+		&quote.Type,
+		&quote.Qoute,
+		&quote.Author,
+		&quote.CreatedAt,
+		&quote.Version,
+	)
+
+	// Check for which error was returned by the query
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	return &quote, nil
 }

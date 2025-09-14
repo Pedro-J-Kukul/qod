@@ -1,5 +1,5 @@
 // Filename: cmd/api/errors.go
-// Description: Handling errors in proper json format
+// Description: Error handling helper functions for the API
 
 package main
 

@@ -9,7 +9,10 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 // creating an envelope type
@@ -120,4 +123,18 @@ func (a *appDependencies) readJson(w http.ResponseWriter, r *http.Request, dest 
 	}
 
 	return nil
+}
+
+// Helper function to read an id parameter from the url
+func (a *appDependencies) readIDParam(r *http.Request) (int64, error) {
+	// get the url parameters
+	params := httprouter.ParamsFromContext(r.Context())
+
+	// convert the id parameter to an int64
+	id, err := strconv.ParseInt(params.ByName("id"), 10, 64)
+	if err != nil || id < 1 {
+		return 0, errors.New("invalid id parameter")
+	}
+
+	return id, nil
 }

@@ -61,3 +61,33 @@ func (a *appDependencies) createQouteHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 }
+
+// Handler for retrieving a qoute
+func (a *appDependencies) displayQouteHandler(w http.ResponseWriter, r *http.Request) {
+	// Get the id from the URL
+	id, err := a.readIDParam(r)
+	if err != nil {
+		a.notFoundResponse(w, r)
+		return
+	}
+
+	// Call the Get method on the model to retrieve the data
+	quote, err := a.model.Get(id)
+	if err != nil {
+		switch {
+		case err == data.ErrRecordNotFound:
+			a.notFoundResponse(w, r)
+		default:
+			a.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	// display the quote
+	data := envelope{"qoute": quote}
+	err = a.writeJSON(w, http.StatusOK, data, nil)
+	if err != nil {
+		a.serverErrorResponse(w, r, err)
+		return
+	}
+}
