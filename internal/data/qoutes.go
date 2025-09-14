@@ -153,3 +153,48 @@ func (q QuoteModel) Delete(id int64) error {
 	}
 	return nil
 }
+
+func (q QuoteModel) GetAll() ([]*Qoute, error) {
+	// sql query to get all records
+	query := `
+		SELECT id, type, quote, author, created_at, version
+		FROM quotes
+		ORDER BY id
+		`
+	// create a context with a 3-second timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	// execute the query
+	rows, err := q.DB.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// create a slice to hold the quotes
+	var quotes []*Qoute
+
+	// iterate over the rows
+	for rows.Next() {
+		var quote Qoute
+		if err := rows.Scan(
+			&quote.ID,
+			&quote.Type,
+			&quote.Qoute,
+			&quote.Author,
+			&quote.CreatedAt,
+			&quote.Version,
+		); err != nil {
+			return nil, err
+		}
+		quotes = append(quotes, &quote)
+	}
+
+	// check for errors from iterating over the rows
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return quotes, nil
+}

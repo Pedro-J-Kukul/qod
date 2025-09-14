@@ -191,3 +191,20 @@ func (a *appDependencies) deleteQouteHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 }
+
+func (a *appDependencies) listQoutesHandler(w http.ResponseWriter, r *http.Request) {
+
+	qoutes, err := a.model.GetAll()
+	if err != nil {
+		a.serverErrorResponse(w, r, err)
+		return
+	}
+
+	// send a JSON response with 200 status code
+	data := envelope{"qoutes": qoutes}
+	err = a.writeJSON(w, http.StatusOK, data, nil)
+	if err != nil {
+		a.serverErrorResponse(w, r, err)
+		return
+	}
+}

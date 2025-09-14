@@ -59,6 +59,12 @@ api/delete:
 	@echo "Deleting a quote..."
 	curl -i -X DELETE localhost:$(PORT)/v1/quotes/$(id)
 
+# make command to list quotes
+.PHONY: api/list
+api/list:
+	@echo "Listing quotes..."
+	curl -i localhost:$(PORT)/v1/quotes
+
 # Create a new migration file
 .PHONY: migration/create
 migration/create:
