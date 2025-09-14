@@ -26,6 +26,7 @@ func (app *appDependencies) routes() http.Handler {
 	router.HandlerFunc(http.MethodPost, "/v2/quotes", app.createQouteHandler)
 	router.HandlerFunc(http.MethodGet, "/v1/quotes/:id", app.displayQouteHandler)
 	router.HandlerFunc(http.MethodPatch, "/v1/quotes/:id", app.updateQouteHandler)
+	router.HandlerFunc(http.MethodDelete, "/v1/quotes/:id", app.deleteQouteHandler)
 
 	// include panic middleware
 	return app.recoverPanic(router)

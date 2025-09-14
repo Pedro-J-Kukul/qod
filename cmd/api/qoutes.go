@@ -163,3 +163,31 @@ func (a *appDependencies) updateQouteHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 }
+
+// Delete Qoute Handler
+func (a *appDependencies) deleteQouteHandler(w http.ResponseWriter, r *http.Request) {
+	// Get the id from the URL
+	id, err := a.readIDParam(r)
+	if err != nil {
+		a.notFoundResponse(w, r)
+		return
+	}
+
+	err = a.model.Delete(id)
+	if err != nil {
+		switch {
+		case err == data.ErrRecordNotFound:
+			a.notFoundResponse(w, r)
+		default:
+			a.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	data := envelope{"message": "qoute successfully deleted"}
+	err = a.writeJSON(w, http.StatusOK, data, nil)
+	if err != nil {
+		a.serverErrorResponse(w, r, err)
+		return
+	}
+}

@@ -53,6 +53,11 @@ api/update/empty:
 	BODY='{}'; \
 	curl -i -X PATCH -H "Content-Type: application/json" -d "$$BODY" localhost:$(PORT)/v1/quotes/$(id)
 
+# make command to delete a comment with id input
+.PHONY: api/delete
+api/delete:
+	@echo "Deleting a quote..."
+	curl -i -X DELETE localhost:$(PORT)/v1/quotes/$(id)
 
 # Create a new migration file
 .PHONY: migration/create
