@@ -9,9 +9,11 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 
+	"github.com/Pedro-J-Kukul/qod/internal/validator"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -137,4 +139,49 @@ func (a *appDependencies) readIDParam(r *http.Request) (int64, error) {
 	}
 
 	return id, nil
+}
+
+// get single string query parameter
+func (a *appDependencies) getSingleQueryParam(queryParameters url.Values, key string, defaultValue string) string {
+	// get the values from the url
+	result := queryParameters.Get(key)
+
+	// if no value is found, return the default value
+	if result == "" {
+		return defaultValue
+	}
+
+	return result
+
+}
+
+// mget multiple values for a query parameter
+func (a *appDependencies) getMultiplequeryParam(queryParameters url.Values, key string, defaultValue []string) []string {
+	// get the values from the url
+	result := queryParameters.Get(key)
+
+	// if no value is found, return the default value
+	if result == "" {
+		return defaultValue
+	}
+	return strings.Split(result, ",")
+}
+
+// this method can cause a validation error if the parameter is not an integer
+func (a *appDependencies) getSingleIntegegerParam(queryParameters url.Values, key string, defaultValue int, v *validator.Validator) int {
+	// get the values from the url
+	result := queryParameters.Get(key)
+
+	// if no value is found, return the default value
+	if result == "" {
+		return defaultValue
+	}
+
+	// convert the string to an integer
+	intResult, err := strconv.Atoi(result)
+	if err != nil {
+		v.AddError(key, "must be an integer value")
+		return defaultValue
+	}
+	return intResult
 }

@@ -194,7 +194,22 @@ func (a *appDependencies) deleteQouteHandler(w http.ResponseWriter, r *http.Requ
 
 func (a *appDependencies) listQoutesHandler(w http.ResponseWriter, r *http.Request) {
 
-	qoutes, err := a.model.GetAll()
+	// create a struct to hold the query string parameters
+	// type, author, page, page_size
+	var queryParamterData struct {
+		Type   string
+		Quote  string
+		Author string
+	}
+
+	queryParamters := r.URL.Query()
+
+	// read the values from the query string into the struct
+	queryParamterData.Type = a.getSingleQueryParam(queryParamters, "type", "")
+	queryParamterData.Quote = a.getSingleQueryParam(queryParamters, "quote", "")
+	queryParamterData.Author = a.getSingleQueryParam(queryParamters, "author", "")
+
+	qoutes, err := a.model.GetAll(queryParamterData.Type, queryParamterData.Quote, queryParamterData.Author)
 	if err != nil {
 		a.serverErrorResponse(w, r, err)
 		return
