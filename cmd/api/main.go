@@ -8,6 +8,7 @@ import (
 	"flag"
 	"log/slog"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/Pedro-J-Kukul/qod/internal/data"
@@ -16,7 +17,7 @@ import (
 )
 
 // AppVersion
-const AppVersion = "1.0.0"
+const AppVersion = "2.5.2"
 
 // server configuration structure
 type serverConfig struct {
@@ -24,6 +25,9 @@ type serverConfig struct {
 	env  string
 	db   struct {
 		dsn string
+	}
+	cors struct {
+		trustedOrigins []string
 	}
 }
 
@@ -68,6 +72,12 @@ func loadConfig() serverConfig {
 	flag.IntVar(&cfg.port, "port", 4000, "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Environment(development|staging|production)")
 	flag.StringVar(&cfg.db.dsn, "db-dsn", "", "postgreSQL DSN")
+
+	// custom command line for cors
+	flag.Func("cors-trusted-origins", "Trusted CORS origins (space separated)", func(s string) error {
+		cfg.cors.trustedOrigins = strings.Fields(s)
+		return nil
+	})
 	flag.Parse()
 	return cfg
 }

@@ -4,7 +4,11 @@ include .envrc
 ## run/api: run the cmd/api application
 .PHONY: run/api
 run/api:
-	go run ./cmd/api --port=$(PORT) --env=$(ENV) --db-dsn=$(DB_DSN)
+	go run ./cmd/api \
+	-port=$(PORT) \
+	-env=$(ENV) \
+	-db-dsn=$(DB_DSN) \
+	-cors-trusted-origins="http://localhost:9000 http://localhost:9001"
 
 ## run/tests: run the tests
 .PHONY: run/tests
@@ -114,3 +118,9 @@ psql/login:
 .PHONY: psql/sudo
 psql/sudo:
 	sudo -u postgres psql
+
+# Git Deleting all local Branches except main
+.PHONY: git/cleanup
+git/cleanup:
+	@echo "Deleting all local branches except 'main'..."
+	@git branch | grep -v "^main$" | xargs git branch -D
