@@ -18,7 +18,7 @@ run/tests:
 ## run/curl: run a curl command to test the healthcheck endpoint
 .PHONY: run/curl
 run/curl:
-	curl -i localhost:$(PORT)/v$(VERSION)/healthcheck
+	curl -i localhost:$(PORT)/v5/healthcheck
 	
 # simple command to update version
 .PHONY: bump/version
