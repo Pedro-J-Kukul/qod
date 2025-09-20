@@ -15,6 +15,19 @@ run/api:
 run/tests:
 	go test ./...
 
+# run/cors-basic
+.PHONY: run/cors-basic
+run/cors-basic:
+	@echo "Basic CORS test"
+	@go run ./cmd/examples/cors/basic
+
+
+# run/cors-preflight
+.PHONY: run/cors-preflight
+run/cors-preflight:
+	@echo "preflight CORS test"
+	@go run ./cmd/examples/cors/preflight
+
 ## run/curl: run a curl command to test the healthcheck endpoint
 .PHONY: run/curl
 run/curl:
