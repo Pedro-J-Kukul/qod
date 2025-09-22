@@ -154,10 +154,10 @@ func (q QuoteModel) Delete(id int64) error {
 	return nil
 }
 
-func (q QuoteModel) GetAll(qtype string, quote string, author string, filters Filters) ([]*Qoute, error) {
+func (q QuoteModel) GetAll(qtype string, quote string, author string, filters Filters) ([]*Qoute, Metadata, error) {
 	// sql query to get all records
 	query := `
-		SELECT id, type, quote, author, created_at, version
+		SELECT COUNT(*) OVER(), id, type, quote, author, created_at, version
 		FROM quotes
 		WHERE (to_tsvector('simple', type) @@ plainto_tsquery('simple', $1) OR $1 = '')
 		AND (to_tsvector('simple', quote) @@ plainto_tsquery('simple', $2) OR $2 = '')
@@ -181,10 +181,11 @@ func (q QuoteModel) GetAll(qtype string, quote string, author string, filters Fi
 	)
 
 	if err != nil {
-		return nil, err
+		return nil, Metadata{}, err
 	}
 	defer rows.Close()
 
+	totalRecords := 0
 	// create a slice to hold the quotes
 	var quotes []*Qoute
 
@@ -192,6 +193,7 @@ func (q QuoteModel) GetAll(qtype string, quote string, author string, filters Fi
 	for rows.Next() {
 		var quote Qoute
 		if err := rows.Scan(
+			&totalRecords,
 			&quote.ID,
 			&quote.Type,
 			&quote.Qoute,
@@ -199,15 +201,16 @@ func (q QuoteModel) GetAll(qtype string, quote string, author string, filters Fi
 			&quote.CreatedAt,
 			&quote.Version,
 		); err != nil {
-			return nil, err
+			return nil, Metadata{}, err
 		}
 		quotes = append(quotes, &quote)
 	}
 
 	// check for errors from iterating over the rows
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, Metadata{}, err
 	}
+	metadata := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
 
-	return quotes, nil
+	return quotes, metadata, nil
 }

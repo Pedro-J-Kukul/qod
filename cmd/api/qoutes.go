@@ -221,7 +221,7 @@ func (a *appDependencies) listQoutesHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	qoutes, err := a.model.GetAll(
+	qoutes, metadata, err := a.model.GetAll(
 		queryParamterData.Type,
 		queryParamterData.Quote,
 		queryParamterData.Author,
@@ -233,7 +233,10 @@ func (a *appDependencies) listQoutesHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	// send a JSON response with 200 status code
-	data := envelope{"qoutes": qoutes}
+	data := envelope{
+		"qoutes":    qoutes,
+		"@metadata": metadata,
+	}
 	err = a.writeJSON(w, http.StatusOK, data, nil)
 	if err != nil {
 		a.serverErrorResponse(w, r, err)
