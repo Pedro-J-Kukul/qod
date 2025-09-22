@@ -200,6 +200,7 @@ func (a *appDependencies) listQoutesHandler(w http.ResponseWriter, r *http.Reque
 		Type   string
 		Quote  string
 		Author string
+		data.Filters
 	}
 
 	queryParamters := r.URL.Query()
@@ -209,7 +210,23 @@ func (a *appDependencies) listQoutesHandler(w http.ResponseWriter, r *http.Reque
 	queryParamterData.Quote = a.getSingleQueryParam(queryParamters, "quote", "")
 	queryParamterData.Author = a.getSingleQueryParam(queryParamters, "author", "")
 
-	qoutes, err := a.model.GetAll(queryParamterData.Type, queryParamterData.Quote, queryParamterData.Author)
+	v := validator.NewValidator()
+	// read and validate the page and page_size query parameters
+	queryParamterData.Page = a.getSingleIntegegerParam(queryParamters, "page", 1, v)
+	queryParamterData.PageSize = a.getSingleIntegegerParam(queryParamters, "page_size", 10, v)
+	data.ValidateFilters(v, queryParamterData.Filters)
+
+	if !v.IsEmpty() {
+		a.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	qoutes, err := a.model.GetAll(
+		queryParamterData.Type,
+		queryParamterData.Quote,
+		queryParamterData.Author,
+		queryParamterData.Filters,
+	)
 	if err != nil {
 		a.serverErrorResponse(w, r, err)
 		return

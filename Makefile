@@ -47,10 +47,17 @@ api/healthcheck:
 # 	echo "Version bumped: v$$current_version → v$$new_version"
 
 # make command to post a comment using QOUTE, AUTHOR, TYPE from .envrc	
-.PHONY: api/post
-api/post:
+.PHONY: api/post/individual
+api/post/individual:
 	@echo "Posting a quote..."
 	BODY='{"type":$(TYPE), "quote":$(QUOTE), "author":$(AUTHOR)}'; \
+	curl -i -H "Content-Type: application/json" -d "$$BODY" localhost:$(PORT)/v2/quotes
+
+# command to post a comment using body data from .envrc
+.PHONY: api/post/body
+api/post/body:
+	@echo "Posting a quote..."
+	BODY='$(UPDATEBODY)'; \
 	curl -i -H "Content-Type: application/json" -d "$$BODY" localhost:$(PORT)/v2/quotes
 
 # make command to get a comment with id input
@@ -90,6 +97,12 @@ api/list:
 api/list/query:
 	@echo "Listing quotes with filters..."
 	curl -i "localhost:$(PORT)/v1/quotes?$(QUERY)"
+
+# make command to list quotes with type filter
+.PHONY: api/list/filter
+api/list/filter:
+	@echo "Listing quotes with type filter..."
+	curl -i "localhost:$(PORT)/v1/quotes?page=$(pg)&page_size=$(sz)"
 
 # Create a new migration file
 .PHONY: migration/create
