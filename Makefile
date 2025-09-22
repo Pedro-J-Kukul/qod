@@ -4,51 +4,54 @@ include .envrc
 ## run/api: run the cmd/api application
 .PHONY: run/api
 run/api:
-	go run ./cmd/api \
+	@echo "Starting API server on port $(PORT) in $(ENV) mode..."
+	@go run ./cmd/api \
 	-port=$(PORT) \
 	-env=$(ENV) \
 	-db-dsn=$(DB_DSN) \
-	-cors-trusted-origins="http://localhost:9000 http://localhost:9001"
+	-cors-trusted-origins="$(CORS_TRUSTED_ORIGINS)"
 
 ## run/tests: run the tests
 .PHONY: run/tests
 run/tests:
-	go test ./...
+	@echo "Running tests..."
+	@go test ./...
 
 # run/cors-basic
-.PHONY: run/cors-basic
-run/cors-basic:
+.PHONY: cors/basic
+cors/basic:
 	@echo "Basic CORS test"
 	@go run ./cmd/examples/cors/basic
 
 
 # run/cors-preflight
-.PHONY: run/cors-preflight
-run/cors-preflight:
+.PHONY: cors/preflight
+cors/preflight:
 	@echo "preflight CORS test"
 	@go run ./cmd/examples/cors/preflight
 
-## run/curl: run a curl command to test the healthcheck endpoint
-.PHONY: run/curl
-run/curl:
-	curl -i localhost:$(PORT)/v5/healthcheck
+# simple curl command to test healthcheck endpoint
+.PHONY: api/healthcheck
+api/healthcheck:
+	@echo "Testing healthcheck endpoint..."
+	@curl -i localhost:$(PORT)/v5/healthcheck
 	
-# simple command to update version
-.PHONY: bump/version
-bump/version:
-	@if [ ! -f .envrc ]; then echo "Error: .envrc file not found"; exit 1; fi; \
-	current_version=$$(grep "VERSION=" .envrc | sed 's/.*VERSION=\([0-9]*\).*/\1/'); \
-	if [ -z "$$current_version" ]; then echo "Error: Could not find VERSION in .envrc"; exit 1; fi; \
-	new_version=$$((current_version + 1)); \
-	sed -i.bak "s/VERSION=[0-9]*/VERSION=$$new_version/" .envrc; \
-	echo "Version bumped: v$$current_version → v$$new_version"
+# # simple command to update version
+# .PHONY: bump/version
+# bump/version:
+# 	@if [ ! -f .envrc ]; then echo "Error: .envrc file not found"; exit 1; fi; \
+# 	current_version=$$(grep "VERSION=" .envrc | sed 's/.*VERSION=\([0-9]*\).*/\1/'); \
+# 	if [ -z "$$current_version" ]; then echo "Error: Could not find VERSION in .envrc"; exit 1; fi; \
+# 	new_version=$$((current_version + 1)); \
+# 	sed -i.bak "s/VERSION=[0-9]*/VERSION=$$new_version/" .envrc; \
+# 	echo "Version bumped: v$$current_version → v$$new_version"
 
-# make command to post a comment
-.PHONY: api/insert
-api/insert:
+# make command to post a comment using QOUTE, AUTHOR, TYPE from .envrc	
+.PHONY: api/post
+api/post:
 	@echo "Posting a quote..."
-	BODY='{"type":"funny", "quote":"I am fond of pigs. Dogs look up to us. Cats look down on us. Pigs treat us as equals.", "author":"Winston S. Churchill"}'; \
-	curl -i -H "Content-Type: application/json" -d "$$BODY" localhost:$(PORT)/v1/quotes
+	BODY='{"type":$(TYPE), "quote":$(QUOTE), "author":$(AUTHOR)}'; \
+	curl -i -H "Content-Type: application/json" -d "$$BODY" localhost:$(PORT)/v2/quotes
 
 # make command to get a comment with id input
 .PHONY: api/get
@@ -56,11 +59,11 @@ api/get:
 	@echo "Getting a quote..."
 	curl -i localhost:$(PORT)/v1/quotes/$(id)
 
-# make command to update a comment with id input
+# make command to update a comment with body data from .envrc
 .PHONY: api/update
 api/update:
 	@echo "Updating a quote..."
-	BODY='{"quote": "Dog eat Cat Yes"}'; \
+	BODY='$(UPDATEBODY)'; \
 	curl -i -X PATCH -H "Content-Type: application/json" -d "$$BODY" localhost:$(PORT)/v1/quotes/$(id)
 
 # make command to test update with no fields
@@ -81,6 +84,12 @@ api/delete:
 api/list:
 	@echo "Listing quotes..."
 	curl -i localhost:$(PORT)/v1/quotes
+
+# make command to list quotes with query parameters
+.PHONY: api/list/query
+api/list/query:
+	@echo "Listing quotes with filters..."
+	curl -i "localhost:$(PORT)/v1/quotes?$(QUERY)"
 
 # Create a new migration file
 .PHONY: migration/create

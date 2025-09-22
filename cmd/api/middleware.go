@@ -24,10 +24,11 @@ func (a *appDependencies) recoverPanic(next http.Handler) http.Handler {
 // Middleware for enabling cors
 func (a *appDependencies) enableCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
 
+		// Setting default CORS headers
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Add("Vary", "Origin")
-		// w.Header().Add("Vary", "Access-Control-Requested-Method")
+		w.Header().Add("Vary", "Access-Control-Requested-Method")
 
 		origin := r.Header.Get("Origin")
 
