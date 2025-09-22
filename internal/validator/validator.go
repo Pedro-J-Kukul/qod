@@ -3,6 +3,8 @@
 
 package validator
 
+import "slices"
+
 type Validator struct {
 	Errors map[string]string
 }
@@ -32,4 +34,9 @@ func (v *Validator) Check(acceptable bool, key string, message string) {
 	if !acceptable {
 		v.AddError(key, message)
 	}
+}
+
+// Function to check if a value is in a list of permitted values
+func (v *Validator) PermittedValue(value string, permittedValues ...string) bool {
+	return slices.Contains(permittedValues, value)
 }

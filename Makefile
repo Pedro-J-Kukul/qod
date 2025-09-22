@@ -98,11 +98,23 @@ api/list/query:
 	@echo "Listing quotes with filters..."
 	curl -i "localhost:$(PORT)/v1/quotes?$(QUERY)"
 
-# make command to list quotes with type filter
-.PHONY: api/list/filter
-api/list/filter:
-	@echo "Listing quotes with type filter..."
+# make command to list quotes with page and page_size filter
+.PHONY: api/list/pagefilter
+api/list/pagefilter:
+	@echo "Listing quotes with page and page_size filter..."
 	curl -i "localhost:$(PORT)/v1/quotes?page=$(pg)&page_size=$(sz)"
+
+# make command to list quotes with type filter
+.PHONY: api/list/sortfilter
+api/list/sortfilter:
+	@echo "Listing quotes with sort filter..."
+	curl -i "localhost:$(PORT)/v1/quotes?page=$(pg)&page_size=$(sz)&sort=$(sort)"
+
+# command to list quotes with sort
+.PHONY: api/list/sort
+api/list/sort:
+	@echo "Listing quotes with sort..."
+	curl -i "localhost:$(PORT)/v1/quotes?sort=$(sort)"
 
 # Create a new migration file
 .PHONY: migration/create

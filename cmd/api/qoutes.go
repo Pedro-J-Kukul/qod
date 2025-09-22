@@ -214,6 +214,8 @@ func (a *appDependencies) listQoutesHandler(w http.ResponseWriter, r *http.Reque
 	// read and validate the page and page_size query parameters
 	queryParamterData.Page = a.getSingleIntegegerParam(queryParamters, "page", 1, v)
 	queryParamterData.PageSize = a.getSingleIntegegerParam(queryParamters, "page_size", 10, v)
+	queryParamterData.Sort = a.getSingleQueryParam(queryParamters, "sort", "id")
+	queryParamterData.SortSafelist = []string{"id", "author", "type", "-id", "-author", "-type"}
 	data.ValidateFilters(v, queryParamterData.Filters)
 
 	if !v.IsEmpty() {

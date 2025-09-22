@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/Pedro-J-Kukul/qod/internal/validator"
@@ -156,15 +157,17 @@ func (q QuoteModel) Delete(id int64) error {
 
 func (q QuoteModel) GetAll(qtype string, quote string, author string, filters Filters) ([]*Qoute, Metadata, error) {
 	// sql query to get all records
-	query := `
+	query := fmt.Sprintf(`
 		SELECT COUNT(*) OVER(), id, type, quote, author, created_at, version
 		FROM quotes
 		WHERE (to_tsvector('simple', type) @@ plainto_tsquery('simple', $1) OR $1 = '')
 		AND (to_tsvector('simple', quote) @@ plainto_tsquery('simple', $2) OR $2 = '')
 		AND (to_tsvector('simple', author) @@ plainto_tsquery('simple', $3) OR $3 = '')
-		ORDER BY id
-		LIMIT $4 OFFSET $5
-		`
+		ORDER BY %s %s, id ASC
+		LIMIT $4 OFFSET $5`,
+		filters.sortColumn(),
+		filters.sortDirection(),
+	)
 	// create a context with a 3-second timeout
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()

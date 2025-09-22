@@ -2,13 +2,17 @@
 package data
 
 import (
+	"strings"
+
 	"github.com/Pedro-J-Kukul/qod/internal/validator"
 )
 
 // Filters struct to hold pagination and sorting data
 type Filters struct {
-	Page     int
-	PageSize int
+	Page         int
+	PageSize     int
+	Sort         string
+	SortSafelist []string
 }
 
 type Metadata struct {
@@ -17,6 +21,38 @@ type Metadata struct {
 	FirstPage    int `json:"first_page,omitempty"`
 	LastPage     int `json:"last_page,omitempty"`
 	TotalRecords int `json:"total_records,omitempty"`
+}
+
+func ValidateFilters(v *validator.Validator, f Filters) {
+	v.Check(f.Page > 0, "page", "must be greater than zero")
+	v.Check(f.Page <= 500, "page", "must be a maximum of 500")
+	v.Check(f.PageSize > 0, "page_size", "must be greater than zero")
+	v.Check(f.PageSize <= 100, "page_size", "must be a maximum of 100")
+	v.Check(v.PermittedValue(f.Sort, f.SortSafelist...), "sort", "invalid sort value")
+}
+
+func (f Filters) limit() int {
+	return f.PageSize
+}
+
+func (f Filters) offset() int {
+	return (f.Page - 1) * f.PageSize
+}
+
+func (f Filters) sortColumn() string {
+	for _, safeValue := range f.SortSafelist {
+		if f.Sort == safeValue {
+			return strings.TrimPrefix(f.Sort, "-")
+		}
+	}
+	panic("unsafe sort value: " + f.Sort)
+}
+
+func (f Filters) sortDirection() string {
+	if strings.HasPrefix(f.Sort, "-") {
+		return "DESC"
+	}
+	return "ASC"
 }
 
 func calculateMetadata(totalRecords int, currentPage int, pageSize int) Metadata {
@@ -31,19 +67,4 @@ func calculateMetadata(totalRecords int, currentPage int, pageSize int) Metadata
 		LastPage:     (totalRecords + pageSize - 1) / pageSize,
 		TotalRecords: totalRecords,
 	}
-}
-
-func ValidateFilters(v *validator.Validator, f Filters) {
-	v.Check(f.Page > 0, "page", "must be greater than zero")
-	v.Check(f.Page <= 500, "page", "must be a maximum of 500")
-	v.Check(f.PageSize > 0, "page_size", "must be greater than zero")
-	v.Check(f.PageSize <= 100, "page_size", "must be a maximum of 100")
-}
-
-func (f Filters) limit() int {
-	return f.PageSize
-}
-
-func (f Filters) offset() int {
-	return (f.Page - 1) * f.PageSize
 }
