@@ -30,7 +30,6 @@ func (a *appDependencies) enableCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		// Setting default CORS headers
-		w.Header().Set("Access-Control-Allow-Origin", "*")        // Allow all origins by default
 		w.Header().Add("Vary", "Origin")                          // Indicate that the response varies based on the Origin header
 		w.Header().Add("Vary", "Access-Control-Requested-Method") // Indicate that the response varies based on the Access-Control-Request-Method header
 

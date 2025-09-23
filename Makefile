@@ -102,14 +102,14 @@ api/list/query:
 	curl -i "localhost:$(PORT)/v1/quotes?$(QUERY)"
 
 # make command to list quotes with page and page_size filter
-.PHONY: api/list/pagefilter
-api/list/pagefilter:
+.PHONY: api/list/pagination
+api/list/pagination:
 	@echo "Listing quotes with page and page_size filter..."
 	curl -i "localhost:$(PORT)/v1/quotes?page=$(pg)&page_size=$(sz)"
 
 # make command to list quotes with type filter
-.PHONY: api/list/sortfilter
-api/list/sortfilter:
+.PHONY: api/list/pagination-sort
+api/list/pagination-sort:
 	@echo "Listing quotes with sort filter..."
 	curl -i "localhost:$(PORT)/v1/quotes?page=$(pg)&page_size=$(sz)&sort=$(sort)"
 
@@ -118,6 +118,12 @@ api/list/sortfilter:
 api/list/sort:
 	@echo "Listing quotes with sort..."
 	curl -i "localhost:$(PORT)/v1/quotes?sort=$(sort)"
+
+# list with sort pagination and query
+.PHONY: api/list/allfilters
+api/list/allfilters:
+	@echo "Listing quotes with all filters..."
+	curl -i "localhost:$(PORT)/v1/quotes?$(QUERY)&page=$(pg)&page_size=$(sz)&sort=$(sort)"
 
 ########################################################################################################
 # Database migration commands

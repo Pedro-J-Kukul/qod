@@ -213,6 +213,8 @@ func (q QuoteModel) GetAll(qtype string, quote string, author string, filters Fi
 	if err := rows.Err(); err != nil {
 		return nil, Metadata{}, err
 	}
+
+	// return the quotes slice and metadata
 	metadata := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
 
 	return quotes, metadata, nil

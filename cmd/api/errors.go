@@ -8,37 +8,33 @@ import (
 	"net/http"
 )
 
-// error helper function to correctly log an error
+// logs the error message along with the request method and URL
 func (app *appDependencies) logError(r *http.Request, err error) {
-	method := r.Method
-	uri := r.URL.RequestURI()
-	app.logger.Error(err.Error(), "method", method, "uri", uri)
+	method := r.Method                                          // get the HTTP method
+	uri := r.URL.RequestURI()                                   // get the request URI
+	app.logger.Error(err.Error(), "method", method, "uri", uri) // log the error with method and URI
 }
 
 // Sends an error response in JSON format
 func (app *appDependencies) errorResponseJSON(w http.ResponseWriter, r *http.Request, status int, message any) {
-	// create an envelope of error data
-	errorData := envelope{"error": message}
-	err := app.writeJSON(w, status, errorData, nil)
+	errorData := envelope{"error": message}         // wrap the message in an envelope
+	err := app.writeJSON(w, status, errorData, nil) // write the JSON response
+	//  log the error if we encounter one while trying to write the response
 	if err != nil {
-		// log the error
-		app.logError(r, err)
-		w.WriteHeader(500)
+		app.logError(r, err) // log the error
+		w.WriteHeader(500)   // send a 500 Internal Server Error status code
 	}
 }
 
-// sends an error in case our server is kabloey
+// error response for total server failure with a 500 status code
 func (app *appDependencies) serverErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
-	// log the error
-	app.logError(r, err)
-	// prepare a message to send to the clietn
-	message := "the server encountered a problem and could not process your request"
-	app.errorResponseJSON(w, r, http.StatusInternalServerError, message)
+	app.logError(r, err)                                                             // log the error
+	message := "the server encountered a problem and could not process your request" // client message
+	app.errorResponseJSON(w, r, http.StatusInternalServerError, message)             // send the error response
 }
 
 // send an error response if our client messes up with a 404
-func (app *appDependencies) notFoundResponse(w http.ResponseWriter,
-	r *http.Request) {
+func (app *appDependencies) notFoundResponse(w http.ResponseWriter, r *http.Request) {
 
 	// we only log server errors, not client errors
 	// prepare a response to send to the client
