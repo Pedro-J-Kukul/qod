@@ -1,7 +1,10 @@
 # Use the .envrc file
 include .envrc
 
-## run/api: run the cmd/api application
+########################################################################################################
+# Commands to run the application and tests
+########################################################################################################
+# run/api: run the cmd/api application
 .PHONY: run/api
 run/api:
 	@echo "Starting API server on port $(PORT) in $(ENV) mode..."
@@ -9,7 +12,10 @@ run/api:
 	-port=$(PORT) \
 	-env=$(ENV) \
 	-db-dsn=$(DB_DSN) \
-	-cors-trusted-origins="$(CORS_TRUSTED_ORIGINS)"
+	-cors-trusted-origins="$(CORS_TRUSTED_ORIGINS)\
+	-rate-limiter-enabled=$(RATE_LIMITER_ENABLED) \
+	-rate-limiter-rps=$(RATE_LIMITER_RPS) \
+	-rate-limiter-burst=$(RATE_LIMITER_BURST)"
 
 ## run/tests: run the tests
 .PHONY: run/tests
@@ -17,12 +23,15 @@ run/tests:
 	@echo "Running tests..."
 	@go test ./...
 
+
+########################################################################################################
+# Commands to run example applications
+########################################################################################################
 # run/cors-basic
 .PHONY: cors/basic
 cors/basic:
 	@echo "Basic CORS test"
 	@go run ./cmd/examples/cors/basic
-
 
 # run/cors-preflight
 .PHONY: cors/preflight
@@ -30,22 +39,16 @@ cors/preflight:
 	@echo "preflight CORS test"
 	@go run ./cmd/examples/cors/preflight
 
+########################################################################################################
+# Commands to interact with the Quotes API
+########################################################################################################
+
 # simple curl command to test healthcheck endpoint
 .PHONY: api/healthcheck
 api/healthcheck:
 	@echo "Testing healthcheck endpoint..."
 	@curl -i localhost:$(PORT)/v5/healthcheck
 	
-# # simple command to update version
-# .PHONY: bump/version
-# bump/version:
-# 	@if [ ! -f .envrc ]; then echo "Error: .envrc file not found"; exit 1; fi; \
-# 	current_version=$$(grep "VERSION=" .envrc | sed 's/.*VERSION=\([0-9]*\).*/\1/'); \
-# 	if [ -z "$$current_version" ]; then echo "Error: Could not find VERSION in .envrc"; exit 1; fi; \
-# 	new_version=$$((current_version + 1)); \
-# 	sed -i.bak "s/VERSION=[0-9]*/VERSION=$$new_version/" .envrc; \
-# 	echo "Version bumped: v$$current_version → v$$new_version"
-
 # make command to post a comment using QOUTE, AUTHOR, TYPE from .envrc	
 .PHONY: api/post/individual
 api/post/individual:
@@ -116,6 +119,9 @@ api/list/sort:
 	@echo "Listing quotes with sort..."
 	curl -i "localhost:$(PORT)/v1/quotes?sort=$(sort)"
 
+########################################################################################################
+# Database migration commands
+########################################################################################################
 # Create a new migration file
 .PHONY: migration/create
 migration/create:
@@ -156,6 +162,9 @@ migration/fix:
 	fi
 	@rm -f /tmp/migrate_version
 
+########################################################################################################
+# PostgreSQL commands
+########################################################################################################
 # Login to psql
 .PHONY: psql/login
 psql/login:
@@ -166,6 +175,9 @@ psql/login:
 psql/sudo:
 	sudo -u postgres psql
 
+########################################################################################################
+# Git commands
+########################################################################################################
 # Git Deleting all local Branches except main
 .PHONY: git/cleanup
 git/cleanup:
