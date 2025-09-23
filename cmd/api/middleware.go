@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"net/http"
+
+	"golang.org/x/time/rate"
 )
 
 // Middleware to close connection when an unexpected panic occurs
@@ -45,6 +47,18 @@ func (a *appDependencies) enableCORS(next http.Handler) http.Handler {
 					break
 				}
 			}
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (a *appDependencies) rateLimit(next http.Handler) http.Handler {
+	limiter := rate.NewLimiter(2, 5)
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !limiter.Allow() {
+			a.rateLimitExceededResponse(w, r)
+			return
 		}
 		next.ServeHTTP(w, r)
 	})

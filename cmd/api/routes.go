@@ -30,5 +30,5 @@ func (app *appDependencies) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/v1/quotes", app.listQoutesHandler)
 
 	// include panic middleware
-	return app.recoverPanic(app.enableCORS(router))
+	return app.recoverPanic(app.rateLimit(app.enableCORS(router)))
 }
