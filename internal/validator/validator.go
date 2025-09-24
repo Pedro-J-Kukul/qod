@@ -3,7 +3,10 @@
 
 package validator
 
-import "slices"
+import (
+	"regexp"
+	"slices"
+)
 
 type Validator struct {
 	Errors map[string]string
@@ -39,4 +42,10 @@ func (v *Validator) Check(acceptable bool, key string, message string) {
 // Function to check if a value is in a list of permitted values
 func (v *Validator) PermittedValue(value string, permittedValues ...string) bool {
 	return slices.Contains(permittedValues, value)
+}
+
+var EmailRX = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+
+func (v *Validator) Matches(value string, rx *regexp.Regexp) bool {
+	return rx.MatchString(value)
 }

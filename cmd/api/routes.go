@@ -29,6 +29,8 @@ func (app *appDependencies) routes() http.Handler {
 	router.HandlerFunc(http.MethodDelete, "/v1/quotes/:id", app.deleteQouteHandler)
 	router.HandlerFunc(http.MethodGet, "/v1/quotes", app.listQoutesHandler)
 
+	router.HandlerFunc(http.MethodPost, "/v1/users", app.registerUserHandler)
+
 	// include panic middleware
 	return app.recoverPanic(app.rateLimit(app.enableCORS(router)))
 }

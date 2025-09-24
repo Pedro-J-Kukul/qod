@@ -38,9 +38,10 @@ type serverConfig struct {
 
 // application dependencies
 type appDependencies struct {
-	config serverConfig
-	logger *slog.Logger
-	model  data.QuoteModel
+	config     serverConfig
+	logger     *slog.Logger
+	quoteModel data.QuoteModel
+	userModel  data.UserModel
 }
 
 // Function: main
@@ -58,9 +59,10 @@ func main() {
 	logger.Info("database connection pool established")
 
 	app := appDependencies{
-		config: cfg,
-		logger: logger,
-		model:  data.QuoteModel{DB: db},
+		config:     cfg,
+		logger:     logger,
+		quoteModel: data.QuoteModel{DB: db},
+		userModel:  data.UserModel{DB: db},
 	}
 
 	err = app.serve()

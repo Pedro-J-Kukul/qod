@@ -40,90 +40,64 @@ cors/preflight:
 	@go run ./cmd/examples/cors/preflight
 
 ########################################################################################################
-# Commands to interact with the Quotes API
+# Commands to interact with the API
 ########################################################################################################
 
-# simple curl command to test healthcheck endpoint
+# get healthcheck endpoint
 .PHONY: api/healthcheck
 api/healthcheck:
 	@echo "Testing healthcheck endpoint..."
 	@curl -i localhost:$(PORT)/v5/healthcheck
-	
-# make command to post a comment using QOUTE, AUTHOR, TYPE from .envrc	
-.PHONY: api/post/individual
-api/post/individual:
+
+# --------------------------------------------------------------------------------------------------------	
+# Quotes API commands
+# --------------------------------------------------------------------------------------------------------
+# POST API commands using type, quote and author variables from .envrc
+.PHONY: api/quotes/post
+api/quotes/post:
 	@echo "Posting a quote..."
 	BODY='{"type":$(TYPE), "quote":$(QUOTE), "author":$(AUTHOR)}'; \
 	curl -i -H "Content-Type: application/json" -d "$$BODY" localhost:$(PORT)/v2/quotes
+	
 
-# command to post a comment using body data from .envrc
-.PHONY: api/post/body
-api/post/body:
-	@echo "Posting a quote..."
-	BODY='$(UPDATEBODY)'; \
-	curl -i -H "Content-Type: application/json" -d "$$BODY" localhost:$(PORT)/v2/quotes
-
-# make command to get a comment with id input
-.PHONY: api/get
-api/get:
+# GET a quote with id input
+.PHONY: api/quotes/get
+api/quotes/get:
 	@echo "Getting a quote..."
 	curl -i localhost:$(PORT)/v1/quotes/$(id)
 
-# make command to update a comment with body data from .envrc
-.PHONY: api/update
-api/update:
+# UPDATE a quote  with id and UPDATEBODY from .envrc input
+.PHONY: api/quotes/update
+api/quotes/update:
 	@echo "Updating a quote..."
-	BODY='$(UPDATEBODY)'; \
-	curl -i -X PATCH -H "Content-Type: application/json" -d "$$BODY" localhost:$(PORT)/v1/quotes/$(id)
+	curl -i -X PATCH -H "Content-Type: application/json" -d $(QUOTESBODY) localhost:$(PORT)/v1/quotes/$(id)
 
-# make command to test update with no fields
-.PHONY: api/update/empty
-api/update/empty:
-	@echo "Updating a quote with no fields..."
-	BODY='{}'; \
-	curl -i -X PATCH -H "Content-Type: application/json" -d "$$BODY" localhost:$(PORT)/v1/quotes/$(id)
-
-# make command to delete a comment with id input
-.PHONY: api/delete
-api/delete:
+# DELETE a quote with id input
+.PHONY: api/quotes/delete
+api/quotes/delete:
 	@echo "Deleting a quote..."
 	curl -i -X DELETE localhost:$(PORT)/v1/quotes/$(id)
 
-# make command to list quotes
-.PHONY: api/list
-api/list:
+# GETALL quotes, list quotes
+.PHONY: api/quotes/list
+api/quotes/list:
 	@echo "Listing quotes..."
 	curl -i localhost:$(PORT)/v1/quotes
 
 # make command to list quotes with query parameters
-.PHONY: api/list/query
-api/list/query:
+.PHONY: api/quotes/list/query
+api/quotes/list/query:
 	@echo "Listing quotes with filters..."
 	curl -i "localhost:$(PORT)/v1/quotes?$(QUERY)"
-
-# make command to list quotes with page and page_size filter
-.PHONY: api/list/pagination
-api/list/pagination:
-	@echo "Listing quotes with page and page_size filter..."
-	curl -i "localhost:$(PORT)/v1/quotes?page=$(pg)&page_size=$(sz)"
-
-# make command to list quotes with type filter
-.PHONY: api/list/pagination-sort
-api/list/pagination-sort:
-	@echo "Listing quotes with sort filter..."
-	curl -i "localhost:$(PORT)/v1/quotes?page=$(pg)&page_size=$(sz)&sort=$(sort)"
-
-# command to list quotes with sort
-.PHONY: api/list/sort
-api/list/sort:
-	@echo "Listing quotes with sort..."
-	curl -i "localhost:$(PORT)/v1/quotes?sort=$(sort)"
-
-# list with sort pagination and query
-.PHONY: api/list/allfilters
-api/list/allfilters:
-	@echo "Listing quotes with all filters..."
-	curl -i "localhost:$(PORT)/v1/quotes?$(QUERY)&page=$(pg)&page_size=$(sz)&sort=$(sort)"
+# --------------------------------------------------------------------------------------------------------
+# Users API commands
+# --------------------------------------------------------------------------------------------------------
+# POST API commands using name, email and password variables from .envrc
+.PHONY: api/users/post
+api/users/post:
+	@echo "Registering a user..."
+	BODY='{"username":$(NAME), "email":$(EMAIL), "password":$(PASSWORD)}'; \
+	curl -i -d "$$BODY" localhost:$(PORT)/v1/users
 
 ########################################################################################################
 # Database migration commands
@@ -189,3 +163,4 @@ psql/sudo:
 git/cleanup:
 	@echo "Deleting all local branches except 'main'..."
 	@git branch | grep -v "^main$" | xargs git branch -D
+

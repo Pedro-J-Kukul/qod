@@ -44,7 +44,7 @@ func (a *appDependencies) createQouteHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	err = a.model.Insert(quote)
+	err = a.quoteModel.Insert(quote)
 	if err != nil {
 		a.serverErrorResponse(w, r, err)
 		return
@@ -72,7 +72,7 @@ func (a *appDependencies) displayQouteHandler(w http.ResponseWriter, r *http.Req
 	}
 
 	// Call the Get method on the model to retrieve the data
-	quote, err := a.model.Get(id)
+	quote, err := a.quoteModel.Get(id)
 	if err != nil {
 		switch {
 		case err == data.ErrRecordNotFound:
@@ -102,7 +102,7 @@ func (a *appDependencies) updateQouteHandler(w http.ResponseWriter, r *http.Requ
 	}
 
 	// Call the Get method on the model to retrieve the data
-	quote, err := a.model.Get(id)
+	quote, err := a.quoteModel.Get(id)
 	if err != nil {
 		switch {
 		case err == data.ErrRecordNotFound:
@@ -149,7 +149,7 @@ func (a *appDependencies) updateQouteHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	err = a.model.Update(quote)
+	err = a.quoteModel.Update(quote)
 	if err != nil {
 		a.serverErrorResponse(w, r, err)
 		return
@@ -173,7 +173,7 @@ func (a *appDependencies) deleteQouteHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	err = a.model.Delete(id)
+	err = a.quoteModel.Delete(id)
 	if err != nil {
 		switch {
 		case err == data.ErrRecordNotFound:
@@ -223,7 +223,7 @@ func (a *appDependencies) listQoutesHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	qoutes, metadata, err := a.model.GetAll(
+	qoutes, metadata, err := a.quoteModel.GetAll(
 		queryParamterData.Type,
 		queryParamterData.Quote,
 		queryParamterData.Author,

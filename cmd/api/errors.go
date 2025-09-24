@@ -63,7 +63,14 @@ func (a *appDependencies) failedValidationResponse(w http.ResponseWriter, r *htt
 	a.errorResponseJSON(w, r, http.StatusUnprocessableEntity, errors)
 }
 
+// For rate limit exceeded errors with a 429 status code
 func (a *appDependencies) rateLimitExceededResponse(w http.ResponseWriter, r *http.Request) {
 	message := "rate limit exceeded"
 	a.errorResponseJSON(w, r, http.StatusTooManyRequests, message)
+}
+
+// for edit conflict status 409
+func (a *appDependencies) editConflictResponse(w http.ResponseWriter, r *http.Request) {
+	message := "unable to update the record due to an edit conflict, please try again"
+	a.errorResponseJSON(w, r, http.StatusConflict, message)
 }
