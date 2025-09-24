@@ -96,7 +96,7 @@ api/quotes/list/query:
 .PHONY: api/users/post
 api/users/post:
 	@echo "Registering a user..."
-	BODY='{"username":$(NAME), "email":$(EMAIL), "password":$(PASSWORD)}'; \
+	BODY='{"username":$(USERNAME), "email":$(USEREMAIL), "password":$(USERPASSWORD)}'; \
 	curl -i -d "$$BODY" localhost:$(PORT)/v1/users
 
 ########################################################################################################
