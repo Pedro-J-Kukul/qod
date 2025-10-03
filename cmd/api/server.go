@@ -35,9 +35,16 @@ func (app *appDependencies) serve() error {
 
 		// 30 second timeout for the shutdown
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-		defer cancel()                                   // run until the timeout expires
-		app.logger.Error("attempting graceful shutdown") // log the shutdown attempt
-		shutdownError <- srv.Shutdown(ctx)               // attempt to gracefully shutdown the server
+		defer cancel() // run until the timeout expires
+
+		err := srv.Shutdown(ctx) // initiate graceful shutdown
+		if err != nil {
+			shutdownError <- err // send any errors to the shutdownError channel
+		}
+
+		app.logger.Info("completing background tasks", "addr", srv.Addr) // log that we're waiting for background tasks to complete
+		app.wg.Wait()                                                    // wait for all background tasks to complete
+		shutdownError <- nil                                             // signal that shutdown is complete without errors
 	}()
 
 	// log the server start

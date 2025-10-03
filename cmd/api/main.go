@@ -9,9 +9,11 @@ import (
 	"log/slog"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/Pedro-J-Kukul/qod/internal/data"
+	"github.com/Pedro-J-Kukul/qod/internal/mailer"
 
 	_ "github.com/lib/pq"
 )
@@ -34,6 +36,13 @@ type serverConfig struct {
 		burst   int
 		enabled bool
 	}
+	smtp struct {
+		host     string
+		port     int
+		username string
+		password string
+		sender   string
+	}
 }
 
 // application dependencies
@@ -42,6 +51,8 @@ type appDependencies struct {
 	logger     *slog.Logger
 	quoteModel data.QuoteModel
 	userModel  data.UserModel
+	mailer     mailer.Mailer
+	wg         sync.WaitGroup
 }
 
 // Function: main
@@ -63,6 +74,8 @@ func main() {
 		logger:     logger,
 		quoteModel: data.QuoteModel{DB: db},
 		userModel:  data.UserModel{DB: db},
+		mailer:     mailer.New(cfg.smtp.host, cfg.smtp.port, cfg.smtp.username, cfg.smtp.password, cfg.smtp.sender),
+		wg:         sync.WaitGroup{},
 	}
 
 	err = app.serve()
@@ -75,13 +88,18 @@ func main() {
 // Function: serverConfig
 // Description: Loads the server configuration from environment variables
 func loadConfig() serverConfig {
-	var cfg serverConfig                                                                            // Initialize a new serverConfig struct
-	flag.IntVar(&cfg.port, "port", 4000, "API server port")                                         //  for port
-	flag.StringVar(&cfg.env, "env", "development", "Environment(development|staging|production)")   // for environment
-	flag.StringVar(&cfg.db.dsn, "db-dsn", "", "postgreSQL DSN")                                     // for database DSN
-	flag.Float64Var(&cfg.limiter.rps, "limiter-rps", 2, "Rate limiter maximum requests per second") // for rate limiter rps
-	flag.IntVar(&cfg.limiter.burst, "limiter-burst", 5, "Rate limiter maximum burst")               // for rate limiter burst
-	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")              // for enabling rate limiter
+	var cfg serverConfig                                                                                                               // Initialize a new serverConfig struct
+	flag.IntVar(&cfg.port, "port", 4000, "API server port")                                                                            //  for port
+	flag.StringVar(&cfg.env, "env", "development", "Environment(development|staging|production)")                                      // for environment
+	flag.StringVar(&cfg.db.dsn, "db-dsn", "", "postgreSQL DSN")                                                                        // for database DSN
+	flag.Float64Var(&cfg.limiter.rps, "limiter-rps", 2, "Rate limiter maximum requests per second")                                    // for rate limiter rps
+	flag.IntVar(&cfg.limiter.burst, "limiter-burst", 5, "Rate limiter maximum burst")                                                  // for rate limiter burst
+	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")                                                 // for enabling rate limiter
+	flag.StringVar(&cfg.smtp.host, "smtp-host", "sandbox.smtp.mailtrap.io", "SMTP host")                                               // for SMTP host
+	flag.IntVar(&cfg.smtp.port, "smtp-port", 25, "SMTP port")                                                                          // for SMTP port
+	flag.StringVar(&cfg.smtp.username, "smtp-username", "", "SMTP username")                                                           // for SMTP username
+	flag.StringVar(&cfg.smtp.password, "smtp-password", "", "SMTP password")                                                           // for SMTP password
+	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "Quote of the Day <noreply@quoteofthedaycommunity.pedrokukul.net>", "SMTP sender") // for SMTP sender
 
 	// for trusted CORS origins
 	flag.Func("cors-trusted-origins", "Trusted CORS origins (space separated)", func(s string) error {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"log/slog"
 	"net/http"
 
 	"github.com/Pedro-J-Kukul/qod/internal/data"
@@ -57,6 +58,13 @@ func (a *appDependencies) registerUserHandler(w http.ResponseWriter, r *http.Req
 	data := envelope{
 		"user": user,
 	}
+
+	a.background(func() {
+		err = a.mailer.Send(user.Email, "user_welcome.tmpl", user)
+		if err != nil {
+			a.logger.Error("unable to send welcome email", slog.String("error", err.Error()), slog.String("user_email", user.Email))
+		}
+	})
 
 	err = a.writeJSON(w, http.StatusCreated, data, nil)
 	if err != nil {

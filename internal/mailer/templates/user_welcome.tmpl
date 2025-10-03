@@ -1,0 +1,38 @@
+// Filename: internal/mailer/templates/user_welcome.templates
+// Description: email server template to send to new users
+
+{{ define "subject" }} Welcome to the Quote of the Day Community! {{ end }}
+
+{{ define "plainBody" }}
+
+Hi,
+
+Thanks for signing up for a Quote of the Day Community account. We're excited to have you on board!
+
+For future reference, you user ID number is {{ .ID }}
+
+Thanks,
+
+The Quote of the Day Team
+{{ end }}
+
+{{ define "htmlBody" }}
+
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+
+<body>
+    <p>Hi,</p>
+    <p>Thanks for signing up for a Quote of the Day Community account. We're excited 
+       to have you on board!</p>
+    <p>For future reference, your user ID number is {{ .ID }}.</p>
+    <p>Thanks,</p>
+    <p>The Comments Community Team</p>
+</body>
+
+</html>
+{{end}}

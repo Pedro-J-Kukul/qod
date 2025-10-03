@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -184,4 +185,22 @@ func (a *appDependencies) getSingleIntegegerParam(queryParameters url.Values, ke
 		return defaultValue
 	}
 	return intResult
+}
+
+// Background function to run tasks in the background
+func (a *appDependencies) background(fn func()) {
+	a.wg.Add(1)
+
+	go func() {
+		defer a.wg.Done()
+
+		// recover from any panic
+		defer func() {
+			if err := recover(); err != nil {
+				a.logger.Error("panic recovered in background goroutine", slog.Any("error", err))
+			}
+		}()
+
+		fn()
+	}()
 }
